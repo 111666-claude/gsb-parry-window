@@ -8,7 +8,7 @@ from .core import Parry
 def build_parser():
     parser = argparse.ArgumentParser(prog="parry-window", description="弹反窗口")
     parser.add_argument("--sample", default="edge",
-                        help="edge / double / cooldown / refund")
+                        help="edge / double / cooldown / refund / sources / refresh / work")
     return parser
 
 
@@ -36,8 +36,24 @@ def main(argv=None):
         parry.press(0)
         _, refund = parry.incoming(250, 50)
         print("refund=%d" % refund)
+    elif args.sample == "sources":
+        parry = Parry(window_ms=200, cooldown_ms=1000, refund_pct=30)
+        parry.press(0, source="skill")
+        taken, _ = parry.incoming(100, 100, source="gear")
+        print("gear_taken=%d" % taken)
+    elif args.sample == "refresh":
+        parry = Parry(window_ms=200, cooldown_ms=1000, refund_pct=30)
+        parry.press(0)
+        parry.press(100)
+        taken, _ = parry.incoming(100, 250)
+        print("late_taken=%d" % taken)
+    elif args.sample == "work":
+        parry = Parry(window_ms=200, cooldown_ms=1000, refund_pct=30)
+        for index in range(3000):
+            parry.incoming(100, index, event_id="e-%d" % index)
+        print("work=%d" % parry.work_count())
     else:
-        raise SystemExit("需要 --sample edge|double|cooldown|refund")
+        raise SystemExit("需要 --sample edge|double|cooldown|refund|sources|refresh|work")
     return 0
 
 
